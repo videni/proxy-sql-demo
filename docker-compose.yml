@@ -1,0 +1,81 @@
+version: '3'
+services:
+    mysql1:
+        image: 'mysql/mysql-server:8.0'
+        container_name: proxy-sql-demo-mysql1
+        command: --default-authentication-plugin=mysql_native_password
+        # ports:
+        #     - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            # - 'proxy-sql-demo-mysql:/var/lib/mysql'
+            - './create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        networks:
+            - proxy-sql-demo
+        env_file:
+            - .env
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    mysql2:
+        container_name: proxy-sql-demo-mysql2
+        image: 'mysql/mysql-server:8.0'
+        command: --default-authentication-plugin=mysql_native_password
+        # ports:
+        #     - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            # - 'proxy-sql-demo-mysql:/var/lib/mysql'
+            - './create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        networks:
+            - proxy-sql-demo
+        env_file:
+            - .env
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    proxysql:
+      container_name: proxy-sql-demo
+      image: 'proxysql/proxysql:latest' # docker pull proxysql/proxysql:2.6.2-debian
+      ports:
+          - '6033:6033'
+          - '6032:6032'
+          - '6070:6070'
+          - '6080:6080'
+      volumes:
+      - './proxysql.cnf:/etc/proxysql.cnf'
+      networks:
+          - proxy-sql-demo
+      depends_on:
+          - mysql1
+          - mysql2
+networks:
+    proxy-sql-demo:
+        driver: bridge
+volumes:
+    proxy-sql-demo-mysql:
+        driver: local
+    proxy-sql-demo-redis:
+        driver: local

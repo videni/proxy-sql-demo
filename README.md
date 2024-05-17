@@ -20,10 +20,10 @@ the demo here follows [MySQL Sharding with ProxySQL](https://www.percona.com/blo
 
 but the article is  too old, not all SQLs are correct, please use the modified ones in this repo.
 
-# Sharding 3 ways
+# 3 sharding methods
 
-[host](./docs/sharding_by_host.md)
-[schema](./docs/sharding_by_schema.md)
-[data](https://proxysql.com/documentation/how-to-setup-proxysql-sharding/)
+* [host](./docs/sharding_by_host.md)
+* [schema](./docs/sharding_by_schema.md)
+* [data](https://proxysql.com/documentation/how-to-setup-proxysql-sharding/)
 
 # [ProxySQL cluster](./docs/proxysql_cluster.md)

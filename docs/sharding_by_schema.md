@@ -53,7 +53,7 @@ insert into mysql_users (username,password,active,default_hostgroup,default_sche
 LOAD MYSQL USERS TO RUNTIME;SAVE MYSQL USERS TO DISK;
 
 INSERT INTO mysql_servers (hostname,hostgroup_id,port,weight) VALUES ('proxy-sql-demo-mysql1',10,3306,100);
-INSERT INTO mysql_servers (hostname,hostgroup_id,port,weight) VALUES ('proxy-sql-demo-mysql1',20,3306,100);
+INSERT INTO mysql_servers (hostname,hostgroup_id,port,weight) VALUES ('proxy-sql-demo-mysql2',20,3306,100);
 
 <!-- INSERT INTO mysql_servers (hostname,hostgroup_id,port,weight) VALUES ('192.168.1.7',30,3306,100); -->
 
@@ -83,17 +83,13 @@ to
 SELECT \1 from \4.\2 WHERE 1=1 \5
 ```
 
-![alt text](image.png)
+![alt text](./image.png)
 
 
 
 Connect ProxySQL via port 6033
 
 mysql  -uuser_shardRW -ptest -P6033
-
-```
-select from name, population from Europe.city where 1=1 and CountryCode='ITA' order by population desc limit 1
-```
 
 # disable a query rule
 
@@ -104,7 +100,6 @@ LOAD MYSQL QUERY RULES TO RUNTIME;SAVE MYSQL QUERY RULES TO DISK;
 
 
 ```sql
-[Pa]
 delete from mysql_query_rules where rule_id in (31,33,34,35,36);
 
 # '/* continent=Asia */' => null
@@ -119,7 +114,7 @@ INSERT INTO mysql_query_rules (rule_id,active,username,match_pattern,replace_pat
 # QR 34 has FlagIN and FlagOUT pointing to the same value of 25 and Apply =0.
 # This brings ProxySQL to recursively call rule 34 until it changes ALL the values of the word world.
 
-# Warning, tested several times, this doesn't work. 
+# Warning, tested several times, this does not work at all. 
 
 INSERT INTO mysql_query_rules (rule_id,active,username,match_pattern,replace_pattern,apply,FlagIN,FlagOUT, log) VALUES (34,1,'user_shardRW','world.','Europe.',0,25,25, 1);
 
@@ -141,7 +136,11 @@ SAVE MYSQL QUERY RULES TO DISK;
 Select /* continent=Europe */ Code, city.Name, city.Population  from world.country join world.city on world.city.CountryCode=world.country.Code where city.Population > 10000 order by city.Population desc limit 5;
 ```
 
-```
+
+
+## Profile 
+
+```sql
 SELECT  active
        ,hits
        ,mysql_query_rules.rule_id
@@ -157,20 +156,20 @@ JOIN stats.stats_mysql_query_rules
 ORDER BY mysql_query_rules.rule_id;
 ```
 
-## Profile 
-
-
-select rule_id,active,username,match_pattern,replace_pattern,apply,FlagOUT,FlagIN, log from mysql_query_rules;
-
-
-
+```sql
 select digest_text from stats_mysql_query_digest
+```
 
 # Find frequent queries
 
 count_star: The total number of times the query pattern has been executed.
-```
-SELECT digest, digest_text, count_star, sum_time, min_time, max_time
+```sql
+SELECT  digest
+       ,digest_text
+       ,count_star
+       ,sum_time
+       ,min_time
+       ,max_time
 FROM stats_mysql_query_digest
 ORDER BY count_star DESC
 LIMIT 10;

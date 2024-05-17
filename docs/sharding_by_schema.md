@@ -168,7 +168,10 @@ select digest_text from stats_mysql_query_digest
 
 # Find frequent queries
 
+count_star: The total number of times the query pattern has been executed.
+```
 SELECT digest, digest_text, count_star, sum_time, min_time, max_time
 FROM stats_mysql_query_digest
 ORDER BY count_star DESC
 LIMIT 10;
+```
